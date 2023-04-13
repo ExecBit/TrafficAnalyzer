@@ -7,7 +7,8 @@ class HttpPacketStat
 {
     public:
     HttpPacketStat();
-    void print_stat();
+    void print_current_stat();
+    void print_final_stat();
     void consume_packet(pcpp::Packet http_packet);
 
     private:

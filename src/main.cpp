@@ -50,12 +50,22 @@ void set_capture_device(log4cplus::Logger& logger, pcpp::PcapLiveDevice* dev, in
 
     dev->startCapture(capture_http_packet, &packet_stat);
 
-    pcpp::multiPlatformSleep(output_period);
+    //set a timer
+    bool shouldStop{false};
+
+//  pcpp::ApplicationEventHandler::getInstance().onApplicationInterrupted(onApplicationInterrupted, &shouldStop);
+
+    while (!shouldStop)
+    {
+        pcpp::multiPlatformSleep(output_period);
+
+        packet_stat.print_current_stat();
+    }
 
     dev->stopCapture();
     dev->close();
 
-    packet_stat.print_stat();
+    packet_stat.print_final_stat();
 }
 
 
