@@ -20,8 +20,24 @@ struct option analyzer_options[] =
     {"help", no_argument, 0, 'h'},
     {"interface", required_argument, 0, 'i'},
     {"period", required_argument, 0, 'p'},
+    {"devices", no_argument, 0, 'd'},
     {0, 0, 0, 0},
 };
+
+void list_devices()
+{
+    const std::vector<pcpp::PcapLiveDevice*>& list_interfaces = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDevicesList();
+
+    std::cout << "Network devices:\n";
+
+    for (auto i = list_interfaces.begin(); i != list_interfaces.end(); ++i)
+    {
+        std::cout << "Name: " << (*i)->getName() << "\tIPv4 adress: " << (*i)->getIPv4Address().toString() << '\n';
+
+    }
+
+    return;
+}
 
 void capture_http_packet(pcpp::RawPacket* raw_packet, pcpp::PcapLiveDevice* dev, void* data)
 {
@@ -71,7 +87,10 @@ void set_capture_device(log4cplus::Logger& logger, pcpp::PcapLiveDevice* dev, in
 
 void print_help()
 {
-    std::cout << "i - interface name\t h - help\n";
+    std::cout << "i - interface name for capture device\n" 
+            << "h - help\n" 
+            << "p - value of period print of output\n" 
+            << "d - list name of network devices\n";
 }
 
 
@@ -97,7 +116,7 @@ int main(int argc, char* argv[])
     int rez{0};
     int option_index{0};
 
-    while ((rez = getopt_long(argc, argv, "h:i:p", analyzer_options, &option_index)) != -1)
+    while ((rez = getopt_long(argc, argv, "h:i:p:d", analyzer_options, &option_index)) != -1)
     {
         switch (rez)
         {
@@ -105,6 +124,7 @@ int main(int argc, char* argv[])
             case 'h': print_help(); break;
             case 'i': interface_name = optarg; break;
             case 'p': output_period = atoi(optarg); break;
+            case 'd': list_devices(); break;
             default: print_help(); return -1;
         }
     }
