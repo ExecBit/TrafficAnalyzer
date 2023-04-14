@@ -19,12 +19,13 @@ namespace pstat
 
     struct HostHttpStat 
     {
-        HostHttpStat();
         int count_request_packet_http;
         int count_response_packet_http;
 
         size_t input_payload;
         size_t output_payload;
+
+        std::string host_name;
     };
 
 

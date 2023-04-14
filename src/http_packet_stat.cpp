@@ -10,15 +10,6 @@
 
 namespace pstat 
 {
-    HostHttpStat::HostHttpStat()
-    {
-        size_t count_request_packet_http{0};
-        size_t count_response_packet_http{0};
-
-        size_t input_payload{0};
-        size_t output_payload{0};
-    }
-
     HttpPacketStat::HttpPacketStat() 
     {
         config.configure();
@@ -49,7 +40,7 @@ namespace pstat
 
         for (auto i = host_table.begin(); i != host_table.end(); ++i)
         {
-            std::cout << i->first << "\t" << i->second.count_request_packet_http + i->second.count_response_packet_http <<
+            std::cout << i->first << "(" << i->second.host_name << ")\t" << i->second.count_request_packet_http + i->second.count_response_packet_http <<
             " packets (" << i->second.count_request_packet_http << " OUT / " << i->second.count_response_packet_http << " IN)\t" <<
             "Traffic: " << i->second.input_payload + i->second.output_payload << " KB (" << i->second.output_payload << "KB OUT / " << 
             i->second.input_payload << "KB IN)\n";
@@ -57,11 +48,13 @@ namespace pstat
     }
     void HttpPacketStat::consume_packet(pcpp::Packet* http_packet)
     {
-      //LOG4CPLUS_INFO(logger, LOG4CPLUS_TEXT("handler http packet"));
         //get tcp layer for counting payload
         pcpp::TcpLayer* tcp_layer = http_packet->getLayerOfType<pcpp::TcpLayer>();
 
+        //get ip layer for host address
         pcpp::IPLayer* ip_layer = http_packet->getLayerOfType<pcpp::IPLayer>();
+
+        //added host name
 
         if (http_packet->isPacketOfType(pcpp::HTTPRequest))
         {
@@ -71,12 +64,16 @@ namespace pstat
 
             std::string host = ip_layer->getDstIPAddress().toString();
 
-          //LOG4CPLUS_INFO(logger, LOG4CPLUS_TEXT("add stat to map (request)"));
+
+            if (host_table.find(host) == host_table.end())
+            {
+                host_table[host].host_name = header_field->getFieldValue();
+
+            }
 
             ++host_table[host].count_request_packet_http; 
             host_table[host].output_payload = tcp_layer->getLayerPayloadSize();
 
-          //LOG4CPLUS_INFO(logger, LOG4CPLUS_TEXT("success adding stat to map (request)"));
             
             return;
         }
@@ -89,7 +86,11 @@ namespace pstat
 
             std::string host = ip_layer->getSrcIPAddress().toString();
 
-          //LOG4CPLUS_INFO(logger, LOG4CPLUS_TEXT("add stat to map (response)"));
+            if (host_table.find(host) == host_table.end())
+            {
+                host_table[host].host_name = header_field->getFieldValue();
+
+            }
 
             ++host_table[host].count_response_packet_http;
             host_table[host].input_payload = tcp_layer->getLayerPayloadSize();
