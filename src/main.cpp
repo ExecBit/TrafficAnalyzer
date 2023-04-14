@@ -8,11 +8,6 @@
 #include <pcapplusplus/PcapLiveDevice.h>
 #include <pcapplusplus/PcapLiveDeviceList.h>
 
-#include <log4cplus/logger.h>
-#include <log4cplus/loggingmacros.h>
-#include <log4cplus/configurator.h>
-#include <log4cplus/initializer.h>
-
 #include "http_packet_stat.hpp"
 
 struct option analyzer_options[] =
@@ -41,11 +36,11 @@ void list_devices()
 
 void capture_http_packet(pcpp::RawPacket* raw_packet, pcpp::PcapLiveDevice* dev, void* data)
 {
-    HttpPacketStat* packet_stat = (HttpPacketStat*)data;
+    pstat::HttpPacketStat* packet_stat = (pstat::HttpPacketStat*)data;
 
     pcpp::Packet parsed_packet(raw_packet);
 
-    packet_stat->consume_packet(parsed_packet);
+    packet_stat->consume_packet(&parsed_packet);
 }
 
 void set_capture_device(log4cplus::Logger& logger, pcpp::PcapLiveDevice* dev, int output_period)
@@ -62,7 +57,7 @@ void set_capture_device(log4cplus::Logger& logger, pcpp::PcapLiveDevice* dev, in
 
 
     //start capture
-    HttpPacketStat packet_stat;
+    pstat::HttpPacketStat packet_stat;
 
     dev->startCapture(capture_http_packet, &packet_stat);
 
