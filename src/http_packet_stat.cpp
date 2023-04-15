@@ -1,12 +1,4 @@
 #include "http_packet_stat.hpp"
-#include <cstddef>
-#include <log4cplus/loggingmacros.h>
-#include <log4cplus/tchar.h>
-#include <pcapplusplus/HttpLayer.h>
-#include <pcapplusplus/IPLayer.h>
-#include <pcapplusplus/ProtocolType.h>
-#include <pcapplusplus/TcpLayer.h>
-#include <pcapplusplus/TextBasedProtocol.h>
 
 namespace pstat 
 {
@@ -19,33 +11,28 @@ namespace pstat
     }
 
 
-    void HttpPacketStat::print_final_stat()
+    void HttpPacketStat::print_stat()
     {
-        //vk.com           100 packets (10 OUT / 90 IN)   Traffic: 150 KB (15KB OUT / 135KB IN)
-        std::cout << "Print final statictic\n";
+        std::vector<std::string> column_names = {"Host name", "IP address", "Number of Packets (IN/OUT)", "Traffic (IN/OUT)"};
+        std::vector<int> column_sizes = {30,20,30, 30};
+
+        pcpp::TablePrinter table(column_names, column_sizes);
 
         for (auto i = host_table.begin(); i != host_table.end(); ++i)
         {
-            std::cout << i->first << "\t" << i->second.count_request_packet_http + i->second.count_response_packet_http <<
-            " packets (" << i->second.count_request_packet_http << " OUT / " << i->second.count_response_packet_http << " IN)\t" <<
-            "Traffic: " << i->second.input_payload + i->second.output_payload << " KB (" << i->second.output_payload << "KB OUT / " << 
-            i->second.input_payload << "KB IN)\n";
-        }
 
+            std::vector<std::string> val{
+                i->second.host_name,
+                i->first,
+                std::to_string(i->second.count_response_packet_http + i->second.count_request_packet_http) +
+                " (" + std::to_string(i->second.count_response_packet_http) + " / " + std::to_string(i->second.count_request_packet_http) + ')',
+                std::to_string(i->second.input_payload + i->second.output_payload) + 
+                " B (" + std::to_string(i->second.input_payload) + "B / " + std::to_string(i->second.output_payload) + "B)"};
 
-    }
-    void HttpPacketStat::print_current_stat()
-    {
-        std::cout << "Count of http packet:\n";
-
-        for (auto i = host_table.begin(); i != host_table.end(); ++i)
-        {
-            std::cout << i->first << "(" << i->second.host_name << ")\t" << i->second.count_request_packet_http + i->second.count_response_packet_http <<
-            " packets (" << i->second.count_request_packet_http << " OUT / " << i->second.count_response_packet_http << " IN)\t" <<
-            "Traffic: " << i->second.input_payload + i->second.output_payload << " KB (" << i->second.output_payload << "KB OUT / " << 
-            i->second.input_payload << "KB IN)\n";
+            table.printRow(val);
         }
     }
+
     void HttpPacketStat::consume_packet(pcpp::Packet* http_packet)
     {
         //get tcp layer for counting payload

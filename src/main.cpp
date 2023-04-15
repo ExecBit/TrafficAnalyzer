@@ -1,12 +1,13 @@
+#include <cstddef>
 #include <getopt.h>
 #include <log4cplus/tchar.h>
 #include <pcapplusplus/Device.h>
 #include <pcapplusplus/Packet.h>
 #include <pcapplusplus/PcapFilter.h>
 #include <pcapplusplus/ProtocolType.h>
-#include <pcapplusplus/SystemUtils.h>
 #include <pcapplusplus/PcapLiveDevice.h>
 #include <pcapplusplus/PcapLiveDeviceList.h>
+#include <pcapplusplus/SystemUtils.h>
 
 #include "http_packet_stat.hpp"
 
@@ -18,6 +19,13 @@ struct option analyzer_options[] =
     {"devices", no_argument, 0, 'd'},
     {0, 0, 0, 0},
 };
+
+void app_interrupted(void* cookie)
+{
+    bool* should_stop = (bool*) cookie;
+
+    *should_stop = true;
+}
 
 void list_devices()
 {
@@ -43,7 +51,7 @@ void capture_http_packet(pcpp::RawPacket* raw_packet, pcpp::PcapLiveDevice* dev,
     packet_stat->consume_packet(&parsed_packet);
 }
 
-void set_capture_device(log4cplus::Logger& logger, pcpp::PcapLiveDevice* dev, int output_period)
+void set_capture_device(log4cplus::Logger& logger, pcpp::PcapLiveDevice* dev, int output_period, bool* should_stop)
 {
     //check device to open
     if (!dev->open())
@@ -61,31 +69,31 @@ void set_capture_device(log4cplus::Logger& logger, pcpp::PcapLiveDevice* dev, in
 
     dev->startCapture(capture_http_packet, &packet_stat);
 
-    //set a timer
-    bool shouldStop{false};
+    std::cout << "Start capture...\n";
 
-//  pcpp::ApplicationEventHandler::getInstance().onApplicationInterrupted(onApplicationInterrupted, &shouldStop);
-
-    while (!shouldStop)
+    while (!*should_stop)
     {
         pcpp::multiPlatformSleep(output_period);
 
-        packet_stat.print_current_stat();
+        packet_stat.print_stat();
     }
 
     dev->stopCapture();
     dev->close();
 
-    packet_stat.print_final_stat();
+    std::cout << "\n!Stop capture!\n\nFinal Statistic\n";
+
+    packet_stat.print_stat();
 }
 
 
 void print_help()
 {
-    std::cout << "i - interface name for capture device\n" 
-            << "h - help\n" 
-            << "p - value of period print of output\n" 
-            << "d - list name of network devices\n";
+    std::cout << "Options:\n" << 
+        "\t-i interface : Use the specified interface. Can be name (eth0) or IPv4 address\n" <<
+        "\t-h help      : Displays help message\n" <<
+        "\t-p period    : Use the specified value of period print of output\n" <<
+        "\t-d devices   : Printed list name of network devices\n";
 }
 
 
@@ -102,6 +110,9 @@ int main(int argc, char* argv[])
 
     logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
     
+    //handler application interrupted
+    bool should_stop{false};
+    pcpp::ApplicationEventHandler::getInstance().onApplicationInterrupted(app_interrupted, &should_stop);
 
     //basic parameters for capture device
     std::string interface_name;
@@ -115,12 +126,11 @@ int main(int argc, char* argv[])
     {
         switch (rez)
         {
-            case 0 : break;
             case 'h': print_help(); break;
             case 'i': interface_name = optarg; break;
             case 'p': output_period = atoi(optarg); break;
             case 'd': list_devices(); break;
-            default: print_help(); return -1;
+            default: print_help(); return 0;
         }
     }
 
@@ -131,7 +141,7 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    set_capture_device(logger, dev, output_period);
+    set_capture_device(logger, dev, output_period, &should_stop);
 
     return 0;
 }
