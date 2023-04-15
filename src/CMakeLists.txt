@@ -21,6 +21,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(PcapPlusPlus log4cplus)
 
+include_directories(log4cplus)
 
 add_executable(${PROJECT_NAME} 
     main.cpp

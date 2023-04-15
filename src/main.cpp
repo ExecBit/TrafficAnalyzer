@@ -1,15 +1,6 @@
-#include <cstddef>
-#include <getopt.h>
-#include <log4cplus/tchar.h>
-#include <pcapplusplus/Device.h>
-#include <pcapplusplus/Packet.h>
-#include <pcapplusplus/PcapFilter.h>
-#include <pcapplusplus/ProtocolType.h>
-#include <pcapplusplus/PcapLiveDevice.h>
-#include <pcapplusplus/PcapLiveDeviceList.h>
-#include <pcapplusplus/SystemUtils.h>
-
 #include "http_packet_stat.hpp"
+#include <log4cplus/loggingmacros.h>
+#include <log4cplus/tchar.h>
 
 struct option analyzer_options[] =
 {
@@ -27,9 +18,15 @@ void app_interrupted(void* cookie)
     *should_stop = true;
 }
 
-void list_devices()
+void list_devices(log4cplus::Logger& logger)
 {
     const std::vector<pcpp::PcapLiveDevice*>& list_interfaces = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDevicesList();
+
+    if (list_interfaces.empty())
+    {
+        LOG4CPLUS_WARN(logger, LOG4CPLUS_TEXT("Not found network interfaces"));
+        return;
+    }
 
     std::cout << "Network devices:\n";
 
@@ -69,7 +66,7 @@ void set_capture_device(log4cplus::Logger& logger, pcpp::PcapLiveDevice* dev, in
 
     dev->startCapture(capture_http_packet, &packet_stat);
 
-    std::cout << "Start capture...\n";
+    LOG4CPLUS_INFO(logger, LOG4CPLUS_TEXT("Start capture..."));
 
     while (!*should_stop)
     {
@@ -81,11 +78,10 @@ void set_capture_device(log4cplus::Logger& logger, pcpp::PcapLiveDevice* dev, in
     dev->stopCapture();
     dev->close();
 
-    std::cout << "\n!Stop capture!\n\nFinal Statistic\n";
+    LOG4CPLUS_INFO(logger, LOG4CPLUS_TEXT("Stop capture!"));
 
     packet_stat.print_stat();
 }
-
 
 void print_help()
 {
@@ -96,19 +92,19 @@ void print_help()
         "\t-d devices   : Printed list name of network devices\n";
 }
 
-
 int main(int argc, char* argv[])
 {
     //initializing application by PcapPlusPlus
     pcpp::AppName::init(argc, argv);
 
     //initializing logger (log4cplus)
-    log4cplus::Logger logger;
+    log4cplus::Initializer initializer;
+  //log4cplus::PropertyConfigurator::doConfigure("log4cplus_configure");
 
     log4cplus::BasicConfigurator config;
     config.configure();
 
-    logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
+    log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
     
     //handler application interrupted
     bool should_stop{false};
@@ -129,7 +125,7 @@ int main(int argc, char* argv[])
             case 'h': print_help(); break;
             case 'i': interface_name = optarg; break;
             case 'p': output_period = atoi(optarg); break;
-            case 'd': list_devices(); break;
+            case 'd': list_devices(logger); break;
             default: print_help(); return 0;
         }
     }

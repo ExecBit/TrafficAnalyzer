@@ -2,6 +2,9 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <cstddef>
+#include <exception>
+#include <getopt.h>
 
 #include <pcapplusplus/Packet.h>
 #include <pcapplusplus/RawPacket.h>
@@ -12,7 +15,13 @@
 #include <pcapplusplus/IPLayer.h>
 #include <pcapplusplus/TablePrinter.h>
 #include <pcapplusplus/SystemUtils.h>
+#include <pcapplusplus/Device.h>
+#include <pcapplusplus/PcapFilter.h>
+#include <pcapplusplus/ProtocolType.h>
+#include <pcapplusplus/PcapLiveDevice.h>
+#include <pcapplusplus/PcapLiveDeviceList.h>
 
+#include <log4cplus/initializer.h>
 #include <log4cplus/logger.h>
 #include <log4cplus/loggingmacros.h>
 #include <log4cplus/configurator.h>
@@ -44,9 +53,9 @@ namespace pstat
 
         private:
 
-        std::map<std::string, HostHttpStat> host_table;
+        std::map<std::string, HostHttpStat> m_host_table;
 
-        log4cplus::Logger logger;
+        log4cplus::Logger m_logger;
         log4cplus::BasicConfigurator config;
     };
 }
