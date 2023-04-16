@@ -11,17 +11,7 @@ FetchContent_Declare(
     SOURCE_DIR ${CMAKE_SOURCE_DIR}/pcapplusplus
 )
 
-FetchContent_Declare(
-    log4cplus
-    GIT_REPOSITORY https://github.com/log4cplus/log4cplus
-    GIT_TAG master
-    SOURCE_DIR ${CMAKE_SOURCE_DIR}/log4cplus
-)
-
-
-FetchContent_MakeAvailable(PcapPlusPlus log4cplus)
-
-include_directories(log4cplus)
+FetchContent_MakeAvailable(PcapPlusPlus)
 
 add_executable(${PROJECT_NAME} 
     main.cpp

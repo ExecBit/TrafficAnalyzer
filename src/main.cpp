@@ -1,6 +1,4 @@
 #include "http_packet_stat.hpp"
-#include <log4cplus/loggingmacros.h>
-#include <log4cplus/tchar.h>
 
 struct option analyzer_options[] =
 {
@@ -99,7 +97,6 @@ int main(int argc, char* argv[])
 
     //initializing logger (log4cplus)
     log4cplus::Initializer initializer;
-  //log4cplus::PropertyConfigurator::doConfigure("log4cplus_configure");
 
     log4cplus::BasicConfigurator config;
     config.configure();
