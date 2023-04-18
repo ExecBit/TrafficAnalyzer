@@ -2,7 +2,7 @@
 
 namespace pstat 
 {
-    HttpPacketStat::HttpPacketStat() : m_logger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("http_packet_stat_class")))
+    HttpPacketStat::HttpPacketStat() : m_logger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("http_packet_stat_class")))  
     {
     }
 
@@ -33,6 +33,18 @@ namespace pstat
 
             table.printRow(val);
         }
+
+    }
+
+    size_t HttpPacketStat::get_count_http_packet()
+    {
+        int count{0};
+        for (const auto& i : m_host_table)
+        {
+            count += i.second.count_request_packet_http + i.second.count_response_packet_http;
+        }
+
+        return count;
     }
 
     void HttpPacketStat::consume_packet(pcpp::Packet* http_packet)

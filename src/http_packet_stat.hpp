@@ -13,20 +13,18 @@
 #include <log4cplus/initializer.h>
 #include <log4cplus/tchar.h>
 
-#include <Packet.h>
-#include <RawPacket.h>
-#include <HttpLayer.h>
-#include <TcpLayer.h>
-#include <ProtocolType.h>
-#include <TextBasedProtocol.h>
-#include <IPLayer.h>
-#include <TablePrinter.h>
-#include <SystemUtils.h>
-#include <Device.h>
-#include <PcapFilter.h>
-#include <ProtocolType.h>
-#include <PcapLiveDevice.h>
-#include <PcapLiveDeviceList.h>
+#include <pcapplusplus/Packet.h>
+#include <pcapplusplus/RawPacket.h>
+#include <pcapplusplus/HttpLayer.h>
+#include <pcapplusplus/TcpLayer.h>
+#include <pcapplusplus/ProtocolType.h>
+#include <pcapplusplus/TextBasedProtocol.h>
+#include <pcapplusplus/IPLayer.h>
+#include <pcapplusplus/TablePrinter.h>
+#include <pcapplusplus/SystemUtils.h>
+#include <pcapplusplus/Device.h>
+#include <pcapplusplus/PcapLiveDevice.h>
+#include <pcapplusplus/PcapLiveDeviceList.h>
 
 
 namespace pstat 
@@ -41,6 +39,7 @@ namespace pstat
         size_t output_payload;
 
         std::string host_name;
+
     };
 
 
@@ -52,11 +51,12 @@ namespace pstat
         void print_stat();
         void consume_packet(pcpp::Packet* http_packet);
 
+        size_t get_count_http_packet();
+
         private:
 
         std::map<std::string, HostHttpStat> m_host_table;
 
         log4cplus::Logger m_logger;
-        log4cplus::BasicConfigurator config;
     };
 }

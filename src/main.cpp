@@ -98,8 +98,10 @@ int main(int argc, char* argv[])
     //initializing logger (log4cplus)
     log4cplus::Initializer initializer;
 
-    log4cplus::BasicConfigurator config;
-    config.configure();
+    log4cplus::helpers::Properties props("../config/log4cplus-config.ini");
+    props.setProperty(LOG4CPLUS_TEXT("log4cplus.appender.MyFileAppender.File"), LOG4CPLUS_TEXT("log.txt"));
+    log4cplus::PropertyConfigurator conf(props);
+    conf.configure();
 
     log4cplus::Logger logger = log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("main"));
     
