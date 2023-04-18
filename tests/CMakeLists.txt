@@ -13,15 +13,6 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(${PROJECT_NAME} http_packet_stat_test.cpp ../src/http_packet_stat.cpp)
 
-add_executable(reader reader.cpp ../src/http_packet_stat.cpp)
-
-target_link_libraries(reader PUBLIC
-    Common++
-    Packet++
-    Pcap++
-    log4cplus
-)
-
 target_link_libraries(${PROJECT_NAME} PUBLIC
     gtest_main
     gmock_main
@@ -34,3 +25,5 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 include(GoogleTest)
 
 gtest_discover_tests(${PROJECT_NAME})
+
+file(COPY ${CMAKE_SOURCE_DIR}/tests/test_http_dump.pcap DESTINATION ${CMAKE_SOURCE_DIR}/build/tests)

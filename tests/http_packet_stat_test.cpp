@@ -1,17 +1,12 @@
 #include <gtest/gtest.h>
 #include "../src/http_packet_stat.hpp"
 
-#include <pcapplusplus/Device.h>
-#include <pcapplusplus/Packet.h>
-#include <pcapplusplus/PcapFileDevice.h>
-#include <pcapplusplus/RawPacket.h>
-
-TEST(DEFAULT, DefiningOfTypeHttpPacket)
+TEST(DEFAULT, CountHttpTypePacket)
 {
     pstat::HttpPacketStat stat;
 
 
-    pcpp::PcapFileReaderDevice reader("http-packets.pcap");
+    pcpp::PcapFileReaderDevice reader("test_http_dump.pcap");
     if (!reader.open())
     {
         std::cerr << "Error opening the pcap file" << std::endl;
@@ -19,13 +14,7 @@ TEST(DEFAULT, DefiningOfTypeHttpPacket)
 
     pcpp::RawPacket raw_packet;
 
-    pcpp::RawPacketVector raw_vector;
-
-    reader.getNextPackets(raw_vector);
-
-    std::cout << raw_vector.size() << '\n';
-
-    if (reader.getNextPacket(raw_packet))
+    while (reader.getNextPacket(raw_packet))
     {
         pcpp::Packet parsed_packet(&raw_packet);
         stat.consume_packet(&parsed_packet);
@@ -34,5 +23,55 @@ TEST(DEFAULT, DefiningOfTypeHttpPacket)
     reader.close();
 
     EXPECT_EQ(596, stat.get_count_http_packet());
+
+}
+
+TEST(DEFAULT, CountHttpRequestPacket)
+{
+    pstat::HttpPacketStat stat;
+
+
+    pcpp::PcapFileReaderDevice reader("test_http_dump.pcap");
+    if (!reader.open())
+    {
+        std::cerr << "Error opening the pcap file" << std::endl;
+    }
+
+    pcpp::RawPacket raw_packet;
+
+    while (reader.getNextPacket(raw_packet))
+    {
+        pcpp::Packet parsed_packet(&raw_packet);
+        stat.consume_packet(&parsed_packet);
+    }
+
+    reader.close();
+
+    EXPECT_EQ(298, stat.get_count_request_http_packet());
+
+}
+
+TEST(DEFAULT, CountHttpResponsePacket)
+{
+    pstat::HttpPacketStat stat;
+
+
+    pcpp::PcapFileReaderDevice reader("test_http_dump.pcap");
+    if (!reader.open())
+    {
+        std::cerr << "Error opening the pcap file" << std::endl;
+    }
+
+    pcpp::RawPacket raw_packet;
+
+    while (reader.getNextPacket(raw_packet))
+    {
+        pcpp::Packet parsed_packet(&raw_packet);
+        stat.consume_packet(&parsed_packet);
+    }
+
+    reader.close();
+
+    EXPECT_EQ(298, stat.get_count_response_http_packet());
 
 }

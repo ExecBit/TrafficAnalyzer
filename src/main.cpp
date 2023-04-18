@@ -37,6 +37,7 @@ void list_devices(log4cplus::Logger& logger)
     return;
 }
 
+//callback function for async capture packet
 void capture_http_packet(pcpp::RawPacket* raw_packet, pcpp::PcapLiveDevice* dev, void* data)
 {
     pstat::HttpPacketStat* packet_stat = (pstat::HttpPacketStat*)data;
@@ -50,13 +51,16 @@ void set_capture_device(log4cplus::Logger& logger, pcpp::PcapLiveDevice* dev, in
 {
     //check device to open
     if (!dev->open())
+    {
         LOG4CPLUS_FATAL(logger, LOG4CPLUS_TEXT("Could't open a device"));
+        return;
+    }
 
     //set a filter
     pcpp::ProtoFilter httpFilter(pcpp::HTTP);
 
     if (!dev->setFilter(httpFilter))
-        LOG4CPLUS_FATAL(logger, LOG4CPLUS_TEXT("Could't set up on filter"));
+        LOG4CPLUS_WARN(logger, LOG4CPLUS_TEXT("Could't set up on filter"));
 
 
     //start capture

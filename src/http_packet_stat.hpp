@@ -13,18 +13,19 @@
 #include <log4cplus/initializer.h>
 #include <log4cplus/tchar.h>
 
-#include <pcapplusplus/Packet.h>
-#include <pcapplusplus/RawPacket.h>
-#include <pcapplusplus/HttpLayer.h>
-#include <pcapplusplus/TcpLayer.h>
-#include <pcapplusplus/ProtocolType.h>
-#include <pcapplusplus/TextBasedProtocol.h>
-#include <pcapplusplus/IPLayer.h>
-#include <pcapplusplus/TablePrinter.h>
-#include <pcapplusplus/SystemUtils.h>
-#include <pcapplusplus/Device.h>
-#include <pcapplusplus/PcapLiveDevice.h>
-#include <pcapplusplus/PcapLiveDeviceList.h>
+#include <Packet.h>
+#include <RawPacket.h>
+#include <HttpLayer.h>
+#include <TcpLayer.h>
+#include <ProtocolType.h>
+#include <TextBasedProtocol.h>
+#include <IPLayer.h>
+#include <TablePrinter.h>
+#include <SystemUtils.h>
+#include <Device.h>
+#include <PcapLiveDevice.h>
+#include <PcapLiveDeviceList.h>
+#include <PcapFileDevice.h>
 
 
 namespace pstat 
@@ -52,6 +53,8 @@ namespace pstat
         void consume_packet(pcpp::Packet* http_packet);
 
         size_t get_count_http_packet();
+        size_t get_count_request_http_packet();
+        size_t get_count_response_http_packet();
 
         private:
 

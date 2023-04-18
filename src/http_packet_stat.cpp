@@ -1,9 +1,11 @@
 #include "http_packet_stat.hpp"
+#include <cstddef>
 
 namespace pstat 
 {
     HttpPacketStat::HttpPacketStat() : m_logger(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("http_packet_stat_class")))  
     {
+        LOG4CPLUS_TRACE(m_logger, LOG4CPLUS_TEXT("create HttpPacketStat object"));
     }
 
     void HttpPacketStat::print_stat()
@@ -38,13 +40,37 @@ namespace pstat
 
     size_t HttpPacketStat::get_count_http_packet()
     {
-        int count{0};
+        size_t count{0};
         for (const auto& i : m_host_table)
         {
             count += i.second.count_request_packet_http + i.second.count_response_packet_http;
         }
 
         return count;
+    }
+
+    size_t HttpPacketStat::get_count_request_http_packet()
+    {
+        size_t count{0};
+        for (const auto& i : m_host_table)
+        {
+            count += i.second.count_request_packet_http;
+        }
+
+        return count;
+
+    }
+
+    size_t HttpPacketStat::get_count_response_http_packet()
+    {
+        size_t count{0};
+        for (const auto& i : m_host_table)
+        {
+            count += i.second.count_response_packet_http;
+        }
+
+        return count;
+
     }
 
     void HttpPacketStat::consume_packet(pcpp::Packet* http_packet)
